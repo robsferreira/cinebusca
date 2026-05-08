@@ -6,39 +6,39 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const TMDB_URL = 'https://api.themoviedb.org/3/search/movie';
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
 
+// IMPORTANTE: Serve os arquivos estáticos (HTML, CSS, JS) da pasta atual
+app.use(express.static('./'));
+
 /**
- * DOCUMENTAÇÃO: Rota de busca
- * Centraliza a lógica de comunicação com o TMDB
+ * ROTA DE BUSCA
  */
 app.get('/buscar', async (req, res) => {
-    const { query } = req.query; // Destruturação para código mais limpo
+    const { query } = req.query;
     const apiKey = process.env.TMDB_API_KEY;
 
     if (!query) {
-        return res.status(400).json({ message: "Termo de busca vazio." });
+        return res.status(400).json({ error: "O termo de busca é obrigatório" });
     }
 
     try {
-        const response = await fetch(`${TMDB_URL}?api_key=${apiKey}&language=pt-BR&query=${encodeURIComponent(query)}`);
-        
-        if (!response.ok) throw new Error('Falha na API externa');
-
+        const url = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&language=pt-BR&query=${encodeURIComponent(query)}`;
+        const response = await fetch(url);
         const data = await response.json();
 
-        // Inteligência: Removemos resultados irrelevantes (sem capa ou sem descrição)
-        const resultadosLimpos = data.results.filter(f => f.poster_path && f.overview);
+        // Filtra filmes com imagem e descrição para manter a qualidade
+        const filmesFiltrados = data.results.filter(f => f.poster_path && f.overview);
 
-        res.json(resultadosLimpos);
+        res.json(filmesFiltrados);
     } catch (error) {
-        console.error("❌ Erro no servidor:", error.message);
-        res.status(500).json({ error: "Erro interno ao buscar filmes." });
+        res.status(500).json({ error: "Erro ao consultar a API" });
     }
 });
 
-app.listen(PORT, () => console.log(`🚀 CineBusca Online: http://localhost:${PORT}`));
+app.listen(PORT, () => {
+    console.log(`✅ Servidor rodando em http://localhost:${PORT}`);
+});
