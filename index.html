@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineBusca - Encontre seu Filme</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Cine<span>Busca</span></h1>
+        <p>Descreva uma cena ou assunto e encontre o filme ideal.</p>
+    </header>
+
+    <main>
+        <section class="search-container">
+            <input type="text" id="userInput" placeholder="Ex: Um robô que quer ser humano...">
+            <button id="searchBtn">Buscar Filme</button>
+        </section>
+
+        <section id="resultsGrid" class="results-grid">
+            <p class="placeholder-text">Seus resultados aparecerão aqui...</p>
+        </section>
+
+        <dialog id="movieModal" class="modal">
+            <div class="modal-content">
+                <button class="close-btn" aria-label="Fechar modal">&times;</button>
+                <article id="modalBody">
+                    </article>
+            </div>
+        </dialog>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 CineBusca - Desenvolvido com Node.js e TMDB API</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
