@@ -1,10 +1,6 @@
-// Localmente:
-const API_URL = 'http://localhost:3000/buscar';
+const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
+const API_URL = '/buscar'; // URL relativa para funcionar no Render
 
-// Online:
-const API_URL = 'https://seu-app-no-render.onrender.com/buscar';
-
-// Centralizando todos os seletores em um único objeto 'el'
 const el = {
     input: document.getElementById('userInput'),
     button: document.getElementById('searchBtn'),
@@ -14,92 +10,64 @@ const el = {
     closeModal: document.querySelector('.close-btn')
 };
 
-/**
- * Interface e Modal
- */
 function mostrarDetalhes(filme) {
     const { title, poster_path, vote_average, overview, release_date } = filme;
     
     el.modalBody.innerHTML = `
         <div class="modal-info-flex">
             <figure>
-                <img src="${IMG_BASE}${poster_path}" alt="Capa do filme ${title}">
+                <img src="${IMG_BASE}${poster_path}" alt="Capa de ${title}">
             </figure>
             <section>
                 <h2>${title}</h2>
-                <time datetime="${release_date}">
-                    <strong>Lançamento:</strong> ${release_date ? release_date.split('-').reverse().join('/') : 'N/A'}
-                </time>
+                <time><strong>Lançamento:</strong> ${release_date ? release_date.split('-').reverse().join('/') : 'N/A'}</time>
                 <p><strong>Avaliação:</strong> ⭐ ${vote_average.toFixed(1)}</p>
                 <hr>
                 <h3>Sinopse</h3>
-                <p>${overview || 'Sinopse não disponível.'}</p>
+                <p>${overview}</p>
             </section>
         </div>
     `;
-    el.modal.showModal(); // Abre o dialog de forma semântica
+    el.modal.showModal();
 }
 
-const renderMessage = (msg) => {
-    el.grid.innerHTML = `<p class="placeholder-text">${msg}</p>`;
-};
-
 const criarCardFilme = (filme) => {
-    const { title, poster_path, vote_average, overview } = filme;
     const card = document.createElement('div');
     card.classList.add('movie-card');
-
     card.innerHTML = `
-        <img src="${IMG_BASE}${poster_path}" alt="${title}" loading="lazy">
+        <img src="${IMG_BASE}${filme.poster_path}" alt="${filme.title}" loading="lazy">
         <div class="movie-info">
-            <h3>${title}</h3>
-            <p>${overview ? overview.substring(0, 90) + '...' : 'Sem descrição.'}</p>
-            <span class="nota">⭐ ${vote_average.toFixed(1)}</span>
+            <h3>${filme.title}</h3>
+            <span class="nota">⭐ ${filme.vote_average.toFixed(1)}</span>
         </div>
     `;
-
-    // Conecta o clique ao modal
     card.addEventListener('click', () => mostrarDetalhes(filme));
-    
     return card;
 };
 
-/**
- * Busca de Dados
- */
 async function executarBusca() {
     const termo = el.input.value.trim();
     if (!termo) return;
 
-    renderMessage("Buscando filmes...");
+    el.grid.innerHTML = '<p class="placeholder-text">Buscando...</p>';
 
     try {
         const res = await fetch(`${API_URL}?query=${encodeURIComponent(termo)}`);
         const filmes = await res.json();
+        el.grid.innerHTML = '';
 
-        el.grid.innerHTML = ''; 
-
-        if (!filmes || filmes.length === 0) {
-            renderMessage("Nenhum filme encontrado.");
+        if (filmes.length === 0) {
+            el.grid.innerHTML = '<p class="placeholder-text">Nenhum filme encontrado.</p>';
             return;
         }
 
         filmes.forEach(f => el.grid.appendChild(criarCardFilme(f)));
-
     } catch (err) {
-        console.error(err);
-        renderMessage("Erro ao conectar com o servidor. Verifique se o Node.js está rodando.");
+        el.grid.innerHTML = '<p class="placeholder-text">Erro ao conectar com o servidor.</p>';
     }
 }
 
-/**
- * Eventos
- */
 el.button.addEventListener('click', executarBusca);
 el.input.addEventListener('keypress', (e) => e.key === 'Enter' && executarBusca());
 el.closeModal.onclick = () => el.modal.close();
-
-// Fechar ao clicar fora do conteúdo branco
-el.modal.addEventListener('click', (e) => {
-    if (e.target === el.modal) el.modal.close();
-});
+el.modal.addEventListener('click', (e) => e.target === el.modal && el.modal.close());
