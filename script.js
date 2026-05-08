@@ -1,5 +1,8 @@
+// Localmente:
 const API_URL = 'http://localhost:3000/buscar';
-const IMG_BASE = 'https://image.tmdb.org/t/p/w500';
+
+// Online:
+const API_URL = 'https://seu-app-no-render.onrender.com/buscar';
 
 // Centralizando todos os seletores em um único objeto 'el'
 const el = {
